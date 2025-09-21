@@ -272,11 +272,3 @@ For issues and questions:
 3. Test database connectivity
 4. Review API documentation at `/docs`
 
-## License
-
-This project is proprietary software for industrial monitoring applications.
-
-```
-
-Do you want me to also make this **GitHub README-ready** (with badges and a table of contents) or keep it plain?
-```
