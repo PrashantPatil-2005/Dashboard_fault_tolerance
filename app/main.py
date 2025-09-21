@@ -16,6 +16,7 @@ from app.database import (
     MachineQueries, BearingQueries, DataQueries, DashboardQueries,
     db_manager
 )
+from app.ssh_tunnel import ssh_tunnel_manager
 from app.models import (
     MachineResponse, BearingResponse, ReadingResponse, LatestReadingResponse,
     KPIStats, HourlyTrend, TimeSeriesPoint, ErrorResponse
@@ -70,6 +71,8 @@ async def startup_event():
     logger.info("Factory Monitoring Backend starting up...")
     logger.info(f"Database: {settings.database_name}")
     logger.info(f"API Host: {settings.api_host}:{settings.api_port}")
+    if settings.use_ssh_tunnel:
+        logger.info(f"SSH Tunnel: Enabled (Host: {settings.ssh_host})")
 
 
 @app.on_event("shutdown")
@@ -77,6 +80,7 @@ async def shutdown_event():
     """Application shutdown event."""
     logger.info("Factory Monitoring Backend shutting down...")
     db_manager.close_connection()
+    # SSH tunnel cleanup is handled by db_manager.close_connection()
 
 
 # Health check endpoint
@@ -350,11 +354,11 @@ async def get_system_stats():
         
         # Get total bearings count
         bearings_collection = db_manager.get_collection("bearings")
-        bearings_count = bearings_collection.count_documents({})
+        bearings_count = bearings_collection.count_documents({}) if bearings_collection is not None else 0
         
         # Get total data records count
         data_collection = db_manager.get_collection("data")
-        data_count = data_collection.count_documents({})
+        data_count = data_collection.count_documents({}) if data_collection is not None else 0
         
         return {
             "machines_count": machines_count,

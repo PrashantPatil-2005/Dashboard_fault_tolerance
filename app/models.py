@@ -6,25 +6,36 @@ These models represent the structure of MongoDB documents and API request/respon
 from typing import List, Dict, Any, Optional, Union
 from datetime import datetime
 from pydantic import BaseModel, Field
+from pydantic.json_schema import JsonSchemaValue
+from pydantic import GetJsonSchemaHandler
+from pydantic_core import core_schema
 from bson import ObjectId
 
 
 class PyObjectId(ObjectId):
-    """Custom ObjectId type for Pydantic models."""
-    
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+    """Custom ObjectId type compatible with Pydantic v2."""
 
     @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
+    def validate(cls, value):
+        if isinstance(value, ObjectId):
+            return value
+        if not ObjectId.is_valid(value):
             raise ValueError("Invalid ObjectId")
-        return ObjectId(v)
+        return ObjectId(value)
 
     @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type="string")
+    def __get_pydantic_core_schema__(cls, source_type, handler):
+        # Validate from string and return an ObjectId
+        return core_schema.no_info_after_validator_function(
+            cls.validate,
+            core_schema.str_schema()
+        )
+
+    @classmethod
+    def __get_pydantic_json_schema__(cls, core_schema_, handler: GetJsonSchemaHandler) -> JsonSchemaValue:
+        json_schema = handler(core_schema_)
+        json_schema.update(type="string")
+        return json_schema
 
 
 class Machine(BaseModel):

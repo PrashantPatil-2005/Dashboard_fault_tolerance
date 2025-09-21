@@ -14,6 +14,7 @@ from pymongo import MongoClient, DESCENDING
 from pymongo.collection import Collection
 from pymongo.database import Database
 from app.config import settings
+from app.ssh_tunnel import ssh_tunnel_manager
 
 logger = logging.getLogger(__name__)
 
@@ -30,12 +31,23 @@ class DatabaseManager:
     def _connect(self):
         """Establish connection to MongoDB."""
         try:
-            self.client = MongoClient(settings.mongodb_url, serverSelectionTimeoutMS=5000)
+            # Start SSH tunnel if configured
+            if settings.use_ssh_tunnel:
+                if not ssh_tunnel_manager.start_tunnel():
+                    logger.warning("Failed to start SSH tunnel, falling back to direct connection")
+                    return
+            
+            # Get the appropriate MongoDB URL (through tunnel or direct)
+            mongodb_url = ssh_tunnel_manager.get_mongodb_url()
+            
+            self.client = MongoClient(mongodb_url, serverSelectionTimeoutMS=5000)
             self.db = self.client[settings.database_name]
             # Test the connection
             self.client.admin.command('ping')
             self.connected = True
-            logger.info(f"Successfully connected to MongoDB: {settings.database_name}")
+            
+            connection_type = "SSH tunnel" if settings.use_ssh_tunnel else "direct"
+            logger.info(f"Successfully connected to MongoDB via {connection_type}: {settings.database_name}")
         except Exception as e:
             logger.warning(f"Failed to connect to MongoDB: {e}")
             logger.info("Running in development mode without database connection")
@@ -43,7 +55,7 @@ class DatabaseManager:
     
     def get_collection(self, collection_name: str) -> Optional[Collection]:
         """Get a MongoDB collection."""
-        if not self.connected or not self.db:
+        if not self.connected or self.db is None:
             logger.warning(f"Database not connected, cannot access collection: {collection_name}")
             return None
         return self.db[collection_name]
@@ -53,6 +65,10 @@ class DatabaseManager:
         if self.client:
             self.client.close()
             logger.info("MongoDB connection closed")
+        
+        # Stop SSH tunnel if active
+        if settings.use_ssh_tunnel:
+            ssh_tunnel_manager.stop_tunnel()
 
 
 # Global database manager instance
@@ -66,7 +82,7 @@ class MachineQueries:
     def get_all_machines(filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
         """Retrieve all machines with optional filtering."""
         collection = db_manager.get_collection("machines")
-        if not collection:
+        if collection is None:
             # Return mock data for development
             return [
                 {
@@ -103,7 +119,7 @@ class MachineQueries:
     def get_machine_by_id(machine_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve a single machine by its ID."""
         collection = db_manager.get_collection("machines")
-        if not collection:
+        if collection is None:
             # Return mock data for development
             mock_machines = {
                 "machine_001": {
@@ -232,7 +248,7 @@ class DashboardQueries:
     def get_kpi_stats(start_date: datetime = None, end_date: datetime = None) -> Dict[str, Any]:
         """Get KPI statistics for the dashboard."""
         collection = db_manager.get_collection("data")
-        if not collection:
+        if collection is None:
             # Return mock data for development
             return {
                 "total_readings": 1250,

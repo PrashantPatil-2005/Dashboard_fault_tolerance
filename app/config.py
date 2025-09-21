@@ -19,6 +19,20 @@ class Settings(BaseSettings):
     mongodb_url: str = "mongodb://localhost:27017/"
     database_name: str = "factory_db"
     
+    # SSH Tunnel Configuration for MongoDB
+    use_ssh_tunnel: bool = False
+    ssh_host: str = "43.205.241.141"
+    ssh_port: int = 22
+    ssh_username: str = "ubuntu"
+    ssh_key_path: str = r"c:\Users\Prash\Desktop\abas\ssh.pem"
+    remote_mongodb_host: str = "localhost"
+    remote_mongodb_port: int = 27017
+    local_mongodb_port: int = 27017
+    
+    # Development Settings
+    debug: bool = False
+    reload: bool = True
+    
     # API Configuration
     api_host: str = "0.0.0.0"
     api_port: int = 8000
