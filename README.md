@@ -25,18 +25,50 @@ A comprehensive industrial data monitoring system built with FastAPI and MongoDB
 
 ## Quick Start
 
-### 1. Install Dependencies
+This project has a FastAPI backend and a Vite + React frontend.
 
-```bash
-pip install -r requirements.txt
-````
+### 1) Prerequisites
 
-### 2. Run the Application
+- Python 3.9+
+- Node.js 18+ and npm
+- Optional: MongoDB at `mongodb://localhost:27017/` (the API includes safe fallbacks if MongoDB is not running)
 
-#### Development Mode
+### 2) Environment Variables
 
-```bash
-python run.py dev
+- Put your `.env` at the project root (e.g., `c:\\Users\\Prash\\Desktop\\NEWWW\\.env`).
+- The backend loads configuration using `dotenv.find_dotenv()` in `app/config.py`, so it will pick up the nearest `.env` automatically.
+
+Example `.env`:
+
+```
+# MongoDB Configuration
+MONGODB_URL=mongodb://localhost:27017/
+DATABASE_NAME=factory_db
+
+# API Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+
+# External API Configuration
+EXTERNAL_API_BASE_URL=https://srcapiv2.aams.io/AAMS/AI
+
+# Logging Configuration
+LOG_LEVEL=INFO
+```
+
+### 3) Run the Backend (Windows PowerShell)
+
+```powershell
+# From directory: Frontend-Dashboard
+python -m venv .venv
+.\.venv\Scripts\python -m pip install --upgrade pip
+.\.venv\Scripts\python -m pip install -r requirements.txt
+
+# Start FastAPI with auto-reload
+.\.venv\Scripts\python run.py dev
+
+# Swagger UI: http://localhost:8000/docs
+# Health:     http://localhost:8000/health
 ```
 
 #### Production Mode with Gunicorn
@@ -44,6 +76,23 @@ python run.py dev
 ```bash
 gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 ```
+
+### 4) Run the Frontend (Vite + React)
+
+```powershell
+# From directory: Frontend-Dashboard\frontend
+npm install
+npm run dev
+
+# Vite dev server: http://localhost:3000
+```
+
+The Vite dev server proxies API calls to the backend:
+
+- Proxy config: `frontend/vite.config.ts`
+- `'/api' -> 'http://localhost:8000'`
+
+The frontend API client uses base URL `'/api'` (`frontend/src/services/api.ts`), so calls are forwarded to FastAPI automatically.
 
 ## API Endpoints
 
@@ -142,12 +191,14 @@ crontab -e
 
 ### Running in Development
 
-```bash
-# Install development dependencies
-pip install -r requirements.txt
+```powershell
+# Create a venv and install deps (Windows PowerShell)
+python -m venv .venv
+.\.venv\Scripts\python -m pip install --upgrade pip
+.\.venv\Scripts\python -m pip install -r requirements.txt
 
 # Run with auto-reload
-python run.py dev
+.\.venv\Scripts\python run.py dev
 
 # Or use uvicorn directly
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
@@ -272,3 +323,6 @@ For issues and questions:
 3. Test database connectivity
 4. Review API documentation at `/docs`
 
+#   F r o n t e n d - D a s h b o a r d  
+ #   F r o n t e n d - D a s h b o a r d  
+ 

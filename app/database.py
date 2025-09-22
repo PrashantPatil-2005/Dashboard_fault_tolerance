@@ -43,7 +43,7 @@ class DatabaseManager:
     
     def get_collection(self, collection_name: str) -> Optional[Collection]:
         """Get a MongoDB collection."""
-        if not self.connected or not self.db:
+        if not self.connected or self.db is None:
             logger.warning(f"Database not connected, cannot access collection: {collection_name}")
             return None
         return self.db[collection_name]
@@ -162,6 +162,9 @@ class BearingQueries:
     def get_bearings_by_machine_id(machine_id: str) -> List[Dict[str, Any]]:
         """Retrieve all bearings for a specific machine."""
         collection = db_manager.get_collection("bearings")
+        if not collection:
+            logger.warning("Database not connected, returning empty bearings list (dev mode)")
+            return []
         bearings = list(collection.find({"machineId": machine_id}))
         logger.info(f"Retrieved {len(bearings)} bearings for machine: {machine_id}")
         return bearings
@@ -175,6 +178,9 @@ class DataQueries:
                    start_date: datetime = None, end_date: datetime = None) -> List[Dict[str, Any]]:
         """Query sensor data with multiple filter criteria."""
         collection = db_manager.get_collection("data")
+        if not collection:
+            logger.warning("Database not connected, returning empty data list (dev mode)")
+            return []
         query = {}
         
         if bearing_id:
@@ -197,6 +203,9 @@ class DataQueries:
     def get_latest_readings_by_machine(machine_id: str) -> List[Dict[str, Any]]:
         """Get the latest reading for each bearing of a machine."""
         collection = db_manager.get_collection("data")
+        if not collection:
+            logger.warning("Database not connected, returning empty latest readings (dev mode)")
+            return []
         
         # MongoDB aggregation pipeline to get latest reading per bearing
         pipeline = [
@@ -217,6 +226,9 @@ class DataQueries:
     def get_reading_by_id(reading_id: str) -> Optional[Dict[str, Any]]:
         """Get a specific reading by its ID."""
         collection = db_manager.get_collection("data")
+        if not collection:
+            logger.warning("Database not connected, cannot retrieve reading (dev mode)")
+            return None
         reading = collection.find_one({"_id": reading_id})
         if reading:
             logger.info(f"Retrieved reading: {reading_id}")
@@ -272,6 +284,9 @@ class DashboardQueries:
     def get_hourly_trends(start_date: datetime = None, end_date: datetime = None) -> List[Dict[str, Any]]:
         """Get hourly reading trends."""
         collection = db_manager.get_collection("data")
+        if not collection:
+            logger.warning("Database not connected, returning empty hourly trends (dev mode)")
+            return []
         
         # Build date filter
         date_filter = {}
@@ -307,6 +322,9 @@ class DashboardQueries:
                          customer: str = None) -> Dict[str, Dict[str, int]]:
         """Get status trends by date."""
         collection = db_manager.get_collection("data")
+        if not collection:
+            logger.warning("Database not connected, returning empty status trends (dev mode)")
+            return {}
         
         # Build match filter
         match_filter = {}
@@ -322,6 +340,9 @@ class DashboardQueries:
         if customer:
             # First get machine IDs for the customer
             machines_collection = db_manager.get_collection("machines")
+            if not machines_collection:
+                logger.warning("Database not connected, cannot filter by customer; returning empty trends (dev mode)")
+                return {}
             machine_ids = [m["_id"] for m in machines_collection.find({"customer": customer}, {"_id": 1})]
             match_filter["machineId"] = {"$in": machine_ids}
         

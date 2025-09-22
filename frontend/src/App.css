@@ -1,0 +1,205 @@
+/* Global styles for the Factory Monitoring Dashboard */
+
+.App {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Custom card styles */
+.p-card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.p-card .p-card-body {
+  padding: 1.5rem;
+}
+
+.p-card .p-card-content {
+  padding: 0;
+}
+
+/* Custom data table styles */
+.p-datatable .p-datatable-header {
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 1rem;
+}
+
+.p-datatable .p-datatable-tbody > tr {
+  transition: background-color 0.2s;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background-color: #f8f9fa;
+}
+
+.p-datatable .p-datatable-tbody > tr.p-selectable-row:hover {
+  background-color: #e3f2fd;
+}
+
+/* Custom button styles */
+.p-button {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.p-button-outlined {
+  border-width: 1px;
+}
+
+/* Custom input styles */
+.p-inputtext {
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.p-inputtext:focus {
+  border-color: #2196f3;
+  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+}
+
+/* Custom dropdown styles */
+.p-dropdown {
+  border-radius: 6px;
+}
+
+.p-dropdown:not(.p-disabled):hover {
+  border-color: #2196f3;
+}
+
+.p-dropdown:not(.p-disabled).p-focus {
+  border-color: #2196f3;
+  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+}
+
+/* Custom calendar styles */
+.p-calendar {
+  border-radius: 6px;
+}
+
+.p-calendar:not(.p-disabled):hover {
+  border-color: #2196f3;
+}
+
+.p-calendar:not(.p-disabled).p-focus {
+  border-color: #2196f3;
+  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+}
+
+/* Custom tag styles */
+.p-tag {
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Custom chart container styles */
+.p-chart {
+  border-radius: 6px;
+}
+
+/* Loading spinner styles */
+.p-progress-spinner {
+  width: 2rem;
+  height: 2rem;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 768px) {
+  .p-card .p-card-body {
+    padding: 1rem;
+  }
+  
+  .p-datatable .p-datatable-header {
+    padding: 0.75rem;
+  }
+  
+  .p-datatable .p-datatable-tbody > tr > td {
+    padding: 0.5rem;
+  }
+}
+
+/* Custom status indicator styles */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-normal {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status-satisfactory {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.status-alert {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.status-unacceptable {
+  background-color: #fce4ec;
+  color: #c2185b;
+}
+
+/* Custom animation for loading states */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.loading-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Custom focus styles for accessibility */
+.p-focusable:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* Custom hover effects */
+.p-hoverable:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+}

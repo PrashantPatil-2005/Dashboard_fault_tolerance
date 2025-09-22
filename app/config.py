@@ -6,11 +6,11 @@ Loads environment variables and provides application settings.
 import os
 from typing import Optional
 from pydantic_settings import BaseSettings
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
-
+# Load environment variables from the nearest .env file (searching upward)
+# This ensures the app picks up the root project's .env even when run from a subdirectory
+load_dotenv(find_dotenv())
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     # MongoDB Configuration
     mongodb_url: str = "mongodb://localhost:27017/"
     database_name: str = "factory_db"
+    
+    # Environment detection
+    environment: str = "development"
     
     # API Configuration
     api_host: str = "0.0.0.0"
