@@ -245,7 +245,7 @@ class DashboardQueries:
         """Get KPI statistics for the dashboard."""
         collection = db_manager.get_collection("data")
         if not collection:
-            # Return mock data for development
+            # Return enhanced mock data for development
             return {
                 "total_readings": 1250,
                 "status_counts": {
@@ -285,8 +285,15 @@ class DashboardQueries:
         """Get hourly reading trends."""
         collection = db_manager.get_collection("data")
         if not collection:
-            logger.warning("Database not connected, returning empty hourly trends (dev mode)")
-            return []
+            logger.warning("Database not connected, returning mock hourly trends (dev mode)")
+            # Return mock data for development
+            mock_trends = []
+            for hour in range(24):
+                mock_trends.append({
+                    "hour": hour,
+                    "count": 50 + (hour * 2)  # Mock data showing increasing activity
+                })
+            return mock_trends
         
         # Build date filter
         date_filter = {}
@@ -323,8 +330,24 @@ class DashboardQueries:
         """Get status trends by date."""
         collection = db_manager.get_collection("data")
         if not collection:
-            logger.warning("Database not connected, returning empty status trends (dev mode)")
-            return {}
+            logger.warning("Database not connected, returning mock status trends (dev mode)")
+            # Return mock data for development
+            from datetime import datetime, timedelta
+            today = datetime.now()
+            mock_trends = {}
+            
+            # Generate mock data for the last 7 days
+            for i in range(7):
+                date = today - timedelta(days=i)
+                date_str = date.strftime("%Y-%m-%d")
+                mock_trends[date_str] = {
+                    "Normal": 15 + i,
+                    "Satisfactory": 8 + i,
+                    "Alert": 2 + i,
+                    "Unacceptable": 1 + i
+                }
+            
+            return mock_trends
         
         # Build match filter
         match_filter = {}

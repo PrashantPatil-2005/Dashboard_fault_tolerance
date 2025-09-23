@@ -332,7 +332,9 @@ async def get_status_trends(
             end_date=end_date,
             customer=customer
         )
-        return trends
+        # Convert dictionary format to array format for frontend
+        trends_array = [{"date": date, "status_counts": counts} for date, counts in trends.items()]
+        return trends_array
     except Exception as e:
         logger.error(f"Error retrieving status trends: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve status trends")

@@ -60,7 +60,7 @@ const MachineTable: React.FC = () => {
     );
   };
 
-  const [showModal,setShowModal]=useState(false);
+  const [showModal, setShowModal] = useState(false);
   const handleViewDetails = (machine: Machine) => {
     setSelectedMachine(machine);
     setShowDetailsModal(true);
