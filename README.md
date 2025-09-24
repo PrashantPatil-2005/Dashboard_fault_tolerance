@@ -322,8 +322,4 @@ For issues and questions:
 3. Test database connectivity
 4. Review API documentation at `/docs`
 
-#   F r o n t e n d - D a s h b o a r d 
- 
- #   F r o n t e n d - D a s h b o a r d 
- 
- 
+
