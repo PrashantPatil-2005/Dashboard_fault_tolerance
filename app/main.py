@@ -70,6 +70,19 @@ async def startup_event():
     logger.info("Factory Monitoring Backend starting up...")
     logger.info(f"Database: {settings.database_name}")
     logger.info(f"API Host: {settings.api_host}:{settings.api_port}")
+    # Debug logging for connectivity
+    try:
+        from app.database import db_manager
+        logger.info(f"DB connected: {db_manager.connected}")
+        logger.info(
+            "SSH tunnel: %s host=%s local=%s:%s",
+            getattr(settings, "ssh_tunnel_enable", False),
+            getattr(settings, "ssh_host", None),
+            getattr(settings, "ssh_local_bind_host", None),
+            getattr(settings, "ssh_local_bind_port", None),
+        )
+    except Exception as e:
+        logger.warning(f"Startup diagnostics failed: {e}")
 
 
 @app.on_event("shutdown")
@@ -91,10 +104,13 @@ async def health_check():
 # ============================================================================
 
 @app.get("/api/machines", response_model=List[MachineResponse])
-async def get_machines():
+async def get_machines(
+    start_date: Optional[datetime] = Query(None, description="Start date (YYYY-MM-DD) for machines ingestedDate range"),
+    end_date: Optional[datetime] = Query(None, description="End date (YYYY-MM-DD) for machines ingestedDate range")
+):
     """Retrieve a list of all machines."""
     try:
-        machines = MachineQueries.get_all_machines()
+        machines = MachineQueries.get_all_machines(start_date=start_date, end_date=end_date)
         return [MachineResponse(**machine) for machine in machines]
     except Exception as e:
         logger.error(f"Error retrieving machines: {e}")
@@ -124,7 +140,9 @@ async def search_machines(
     area: Optional[str] = Query(None, description="Filter by area"),
     subarea: Optional[str] = Query(None, description="Filter by subarea"),
     machine_name: Optional[str] = Query(None, description="Filter by machine name"),
-    status: Optional[str] = Query(None, description="Filter by status")
+    status: Optional[str] = Query(None, description="Filter by status"),
+    start_date: Optional[datetime] = Query(None, description="Start date (YYYY-MM-DD) for machines ingestedDate range"),
+    end_date: Optional[datetime] = Query(None, description="End date (YYYY-MM-DD) for machines ingestedDate range")
 ):
     """Search machines with multiple filter criteria."""
     try:
@@ -133,7 +151,9 @@ async def search_machines(
             area=area,
             subarea=subarea,
             machine_name=machine_name,
-            status=status
+            status=status,
+            start_date=start_date,
+            end_date=end_date
         )
         return [MachineResponse(**machine) for machine in machines]
     except Exception as e:

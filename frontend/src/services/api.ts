@@ -32,8 +32,13 @@ api.interceptors.response.use(
 // Machine API calls
 export const machineAPI = {
   // Get all machines
-  getAllMachines: async (): Promise<Machine[]> => {
-    const response = await api.get('/machines');
+  getAllMachines: async (startDate?: string, endDate?: string): Promise<Machine[]> => {
+    const params = new URLSearchParams();
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    const qs = params.toString();
+    const url = qs ? `/machines?${qs}` : '/machines';
+    const response = await api.get(url);
     return response.data;
   },
 
@@ -50,12 +55,13 @@ export const machineAPI = {
     subarea?: string;
     machine_name?: string;
     status?: string;
+    start_date?: string;
+    end_date?: string;
   }): Promise<Machine[]> => {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value) params.append(key, value);
     });
-    
     const response = await api.get(`/machines/search?${params.toString()}`);
     return response.data;
   },

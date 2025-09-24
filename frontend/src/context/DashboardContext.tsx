@@ -111,7 +111,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
       // Load all data in parallel
       const [machines, kpiStats, statusTrends, hourlyTrends] = await Promise.all([
-        machineAPI.getAllMachines(),
+        machineAPI.getAllMachines(startDate, endDate),
         dashboardAPI.getKPIs(startDate, endDate),
         dashboardAPI.getStatusTrends(startDate, endDate),
         dashboardAPI.getHourlyTrends(startDate, endDate),
@@ -145,7 +145,11 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           return acc;
         }, {} as Record<string, string>);
 
-        const filteredMachines = await machineAPI.searchMachines(searchParams);
+        const filteredMachines = await machineAPI.searchMachines({
+          ...searchParams,
+          start_date: format(startOfMonth(state.selectedDate), 'yyyy-MM-dd'),
+          end_date: format(endOfMonth(state.selectedDate), 'yyyy-MM-dd'),
+        });
         dispatch({ type: 'SET_FILTERED_MACHINES', payload: filteredMachines });
       } catch (backendError) {
         console.warn('Backend search failed, using client-side filtering:', backendError);

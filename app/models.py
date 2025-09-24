@@ -6,25 +6,36 @@ These models represent the structure of MongoDB documents and API request/respon
 from typing import List, Dict, Any, Optional, Union
 from datetime import datetime
 from pydantic import BaseModel, Field
+from pydantic import GetCoreSchemaHandler
+from pydantic.json_schema import JsonSchemaValue
+from pydantic_core import core_schema
 from bson import ObjectId
 
 
 class PyObjectId(ObjectId):
-    """Custom ObjectId type for Pydantic models."""
-    
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+    """Custom ObjectId type compatible with Pydantic v2."""
 
     @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
+    def __get_pydantic_core_schema__(
+        cls, source_type: type, handler: GetCoreSchemaHandler
+    ) -> core_schema.CoreSchema:
+        def validate(value: Any) -> ObjectId:
+            if isinstance(value, ObjectId):
+                return value
+            if isinstance(value, str) and ObjectId.is_valid(value):
+                return ObjectId(value)
             raise ValueError("Invalid ObjectId")
-        return ObjectId(v)
+
+        return core_schema.no_info_plain_validator_function(validate)
 
     @classmethod
-    def __get_pydantic_json_schema__(cls, field_schema):
-        return {"type": "string"}
+    def __get_pydantic_json_schema__(
+        cls, core_schema_: core_schema.CoreSchema, handler: GetCoreSchemaHandler
+    ) -> JsonSchemaValue:
+        json_schema = handler(core_schema_)
+        if isinstance(json_schema, dict):
+            json_schema.update({"type": "string"})
+        return json_schema
 
 
 class Machine(BaseModel):
@@ -42,7 +53,7 @@ class Machine(BaseModel):
     updated_at: Optional[datetime] = Field(None, alias="updatedAt")
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -60,7 +71,7 @@ class MachineResponse(BaseModel):
     ingested_date: Optional[str] = Field(None, alias="ingestedDate")
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class Bearing(BaseModel):
@@ -75,7 +86,7 @@ class Bearing(BaseModel):
     created_at: Optional[datetime] = Field(None, alias="createdAt")
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -91,7 +102,7 @@ class BearingResponse(BaseModel):
     status: Optional[str] = "Normal"
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class AccelerationData(BaseModel):
@@ -103,7 +114,7 @@ class AccelerationData(BaseModel):
     kurtosis: Optional[float] = None
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class VelocityData(BaseModel):
@@ -114,7 +125,7 @@ class VelocityData(BaseModel):
     crest_factor: Optional[float] = Field(None, alias="crestFactor")
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class FFTData(BaseModel):
@@ -125,7 +136,7 @@ class FFTData(BaseModel):
     dominant_frequency: Optional[float] = Field(None, alias="dominantFrequency")
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class Reading(BaseModel):
@@ -152,7 +163,7 @@ class Reading(BaseModel):
     raw_data: Optional[Dict[str, Any]] = Field(None, alias="rawData")
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -172,7 +183,7 @@ class ReadingResponse(BaseModel):
     fft_data: Optional[FFTData] = Field(None, alias="fftData")
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class LatestReadingResponse(BaseModel):
@@ -187,7 +198,7 @@ class LatestReadingResponse(BaseModel):
     temperature: Optional[float] = None
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class KPIStats(BaseModel):
